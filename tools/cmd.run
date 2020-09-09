@@ -1,0 +1,11 @@
+#!/bin/bash
+trap "kill $$" SIGINT
+set -x
+SERVERS=$(cat nodelist)
+for s in $SERVERS
+do ssh $s "$1" > /tmp/cmd.run-$s
+done 
+wait
+for s in $SERVERS 
+do cat /tmp/cmd.run-$s
+done

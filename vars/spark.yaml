@@ -1,0 +1,4 @@
+CONFIG: /quobyte/config
+SPARK_DOWNLOAD_URL: https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop3.2.tgz
+SPARK_MASTER: 172.16.78.111
+WORKER_OPTS: ""

@@ -1,0 +1,80 @@
+---
+- hosts: slaves
+  vars_files:
+    - vars/spark.yaml
+  environment:
+    CONFIGURE_OPTS: 'SPARK_HOME={{ CONFIG }}/spark'
+  become: yes
+  tasks:
+
+    - name: Kill java
+      shell:
+        cmd: pkill -9 java
+
+    - name: Remove packages Centos
+      yum:
+        name: "{{ packages }}"
+        state: absent
+        update_cache: no
+      vars:
+        packages:
+        - atop
+        - htop
+        - netdata
+        - irqbalance
+        - java-8-openjdk
+        - scala
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+      tags: packages
+
+    - name: Remove packages Ubuntu
+      apt:
+        name: "{{ packages }}"
+        state: absent
+        update_cache: no
+      vars:
+        packages:
+        - atop
+        - htop
+        - netdata
+        - tuned
+        - irqbalance
+        - openjdk-8-jre-headless
+        - scala
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      tags: packages
+
+    - name: Removing the path from /etc/environment
+      lineinfile:
+        dest: /etc/environment
+        line: 'SPARK_HOME={{ CONFIG }}/spark'
+        insertafter: 'EOF'
+        regexp: 'SPARK_HOME={{ CONFIG }}/spark'
+        state: absent
+      become: yes
+      tags: spark
+
+- hosts: master
+  vars_files:
+    - vars/spark.yaml
+  environment:
+    CONFIGURE_OPTS: 'SPARK_HOME={{ CONFIG }}/spark'
+  become: no
+  tasks:
+ 
+    - name: Delete spark directory
+      file:
+        path: '{{ CONFIG }}/spark'
+        state: absent
+      tags: spark
+      
+    - name: Removing the path from /etc/environment
+      lineinfile:
+        dest: /etc/environment
+        line: 'SPARK_HOME={{ CONFIG }}/spark'
+        insertafter: 'EOF'
+        regexp: 'SPARK_HOME={{ CONFIG }}/spark'
+        state: absent
+      become: yes
+      tags: spark
+
