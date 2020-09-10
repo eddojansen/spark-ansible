@@ -47,8 +47,8 @@
     - name: Ensure netdata is configured to listen on all IP's
       lineinfile:
         path: /etc/netdata/netdata.conf
-        regexp: 'bind to = localhost'
-        line:         bind to = {{ ansible_default_ipv4.address }}
+        regexp: 'bind socket to IP ='
+        line:         bind socket to IP = {{ ansible_default_ipv4.address }}
       tags: packages
 
     - name: Restart netdata
