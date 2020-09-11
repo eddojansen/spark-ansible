@@ -250,6 +250,24 @@
   become: no
   tasks:
 
+    - set_fact:
+        master_ip: "{{ ansible_default_ipv4.address }}"
+      tags: test
+      
+    - set_fact:
+        slave_ip: "{{ groups['slaves'] | map('extract', hostvars, ['ansible_default_ipv4', 'address'])  | list  }}"
+      tags: spark
+
+    - name: Copy getGpusResources.sh
+      environment:
+        SPARK_RAPIDS_DIR: '{{ CONFIG }}/sparkRapidsPlugin'
+      copy:
+        src:  templates/getGpusResources.sh
+        dest: $SPARK_RAPIDS_DIR/getGpusResources.sh
+        backup: yes
+        mode: 0777
+      tags: spark
+
     - name: Copy spark-env.sh
       environment:
         SPARK_HOME: '{{ CONFIG }}/spark'
@@ -264,9 +282,9 @@
         SPARK_HOME: '{{ CONFIG }}/spark'
       lineinfile:
         dest: $SPARK_HOME/conf/spark-env.sh
-        line: 'SPARK_MASTER_HOST="{{ SPARK_MASTER }}"'
+        line: 'SPARK_MASTER_HOST="{{ master_ip }}"'
         insertafter: 'EOF'
-        regexp: 'SPARK_MASTER_HOST="{{ SPARK_MASTER }}"'
+        regexp: 'SPARK_MASTER_HOST="{{ master_ip }}"'
         state: present
       become_flags: '-l'        
       tags: spark
@@ -291,10 +309,6 @@
         backup: yes
       tags: spark
 
-    - set_fact:
-        ip_list: "{{ groups['slaves'] | map('extract', hostvars, ['ansible_default_ipv4', 'address'])  | list  }}"
-      tags: spark
-
     - name: Set slave list in config file
       environment:
         SPARK_HOME: '{{ CONFIG }}/spark'
@@ -302,7 +316,7 @@
         path: "$SPARK_HOME/conf/slaves"
         line: "{{ item }}"
       with_items:
-        - "{{ ip_list }}"
+        - "{{ slave_ip }}"
       tags: spark
  
     - name: Start Spark Master & Slaves

@@ -2,8 +2,6 @@
 - hosts: all
   vars_files:
     - vars/spark.yaml
-  environment:
-    CONFIGURE_OPTS: 'SPARK_HOME={{ CONFIG }}/spark'
   become: yes
   tasks:
 
