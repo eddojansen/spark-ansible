@@ -145,16 +145,6 @@
         cmd: tuned-adm profile throughput-performance
       tags: tune
 
-    - name: Adding the path to /etc/environment
-      lineinfile:
-        dest: /etc/environment
-        line: 'SPARK_HOME={{ CONFIG }}/spark'
-        insertafter: 'EOF'
-        regexp: 'SPARK_HOME={{ CONFIG }}/spark'
-        state: present
-      become: yes
-      tags: spark
-
 - hosts: master
   gather_facts: true
   vars_files:
@@ -168,16 +158,72 @@
         state: directory
         recurse: yes
       tags: spark
+
+    - name: Create sparkRapidsPlugin directory
+      file:
+        path: '{{ CONFIG }}/sparkRapidsPlugin'
+        state: directory
+        recurse: yes
+      tags: spark
       
     - name: Download and unarchive Spark
       unarchive:
-        src: "{{ SPARK_DOWNLOAD_URL }}"
+        src: '{{ SPARK_DOWNLOAD_URL }}'
         dest: '{{ CONFIG }}/spark'
         remote_src: yes
         extra_opts: [--strip-components=1]
       tags: spark
 
-    - name: Adding the path to /etc/environment
+    - name: Download Rapids
+      get_url:
+        url: '{{ RAPIDS_PLUGIN_URL }}'
+        dest: '{{ CONFIG }}/sparkRapidsPlugin'
+      tags: spark
+
+    - name: Download Cudf
+      get_url:
+        url: '{{ CUDF_FILES_URL }}'
+        dest: '{{ CONFIG }}/sparkRapidsPlugin'
+      tags: spark
+
+- hosts: master:slaves
+  gather_facts: true
+  vars_files:
+    - vars/spark.yaml
+  become: no
+  tasks:
+
+    - name: Set SPARK_RAPIDS_PLUGIN_JAR
+      environment:
+        SPARK_HOME: '{{ CONFIG }}/spark'
+        SPARK_RAPIDS_DIR: '{{ CONFIG }}/sparkRapidsPlugin'
+      lineinfile:
+        dest: /etc/environment
+        line: SPARK_RAPIDS_PLUGIN_JAR="{{ item }}"
+        insertafter: 'EOF'
+        regexp: '{{ item }}'
+        state: present
+      with_fileglob:
+        - '{{ CONFIG }}/sparkRapidsPlugin/rapids*'        
+      become: yes
+      tags: spark
+ 
+    - name: Set SPARK_CUDF_JAR
+      environment:
+        SPARK_HOME: "{{ CONFIG }}/spark"
+        SPARK_RAPIDS_DIR: '{{ CONFIG }}/sparkRapidsPlugin'
+      lineinfile:
+        dest: /etc/environment
+        line: SPARK_CUDF_JAR="{{ item }}"
+        insertafter: 'EOF'
+        regexp: '{{ item }}'
+        state: present
+      with_fileglob:
+        - "{{ CONFIG }}/sparkRapidsPlugin/cudf*"
+      become: yes
+      tags: test
+
+    - name: Adding SPARK_HOME to /etc/environment
       lineinfile: 
         dest: /etc/environment
         line: 'SPARK_HOME={{ CONFIG }}/spark' 
@@ -186,6 +232,23 @@
         state: present
       become: yes
       tags: spark
+
+    - name: Adding SPARK_RAPIDS_DIR to /etc/environment
+      lineinfile:
+        dest: /etc/environment
+        line: "SPARK_RAPIDS_DIR={{ CONFIG }}/sparkRapidsPlugin"
+        insertafter: 'EOF'
+        regexp: "SPARK_RAPIDS_DIR={{ CONFIG }}/sparkRapidsPlugin"
+        state: present
+      become: yes
+      tags: spark
+
+- hosts: master
+  gather_facts: true
+  vars_files:
+    - vars/spark.yaml
+  become: no
+  tasks:
 
     - name: Copy spark-env.sh
       environment:
@@ -213,9 +276,9 @@
         SPARK_HOME: '{{ CONFIG }}/spark'
       lineinfile:
         dest: $SPARK_HOME/conf/spark-env.sh
-        line: ' SPARK_WORKER_OPTS="{{ WORKER_OPTS }}"'
+        line: 'SPARK_WORKER_OPTS="{{ WORKER_OPTS }}"'
         insertafter: 'EOF'
-        regexp: SPARK_WORKER_OPTS="{{ WORKER_OPTS }}"'
+        regexp: 'SPARK_WORKER_OPTS="{{ WORKER_OPTS }}"'
         state: present
       tags: spark
    
@@ -241,7 +304,7 @@
       with_items:
         - "{{ ip_list }}"
       tags: spark
-
+ 
     - name: Start Spark Master & Slaves
       environment:
         SPARK_HOME: '{{ CONFIG }}/spark'

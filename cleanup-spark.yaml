@@ -1,5 +1,5 @@
 ---
-- hosts: slaves
+- hosts: all
   vars_files:
     - vars/spark.yaml
   environment:
@@ -10,6 +10,7 @@
     - name: Kill java
       shell:
         cmd: pkill -9 java
+      ignore_errors: yes
 
     - name: Remove packages Centos
       yum:
@@ -26,6 +27,7 @@
         - scala
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
       tags: packages
+      ignore_errors: yes
 
     - name: Remove packages Ubuntu
       apt:
@@ -43,23 +45,21 @@
         - scala
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
       tags: packages
+      ignore_errors: yes
 
     - name: Removing the path from /etc/environment
       lineinfile:
         dest: /etc/environment
-        line: 'SPARK_HOME={{ CONFIG }}/spark'
-        insertafter: 'EOF'
-        regexp: 'SPARK_HOME={{ CONFIG }}/spark'
+        regexp: 'SPARK'
         state: absent
       become: yes
       tags: spark
+      ignore_errors: yes
 
 - hosts: master
   vars_files:
     - vars/spark.yaml
-  environment:
-    CONFIGURE_OPTS: 'SPARK_HOME={{ CONFIG }}/spark'
-  become: no
+  become: yes
   tasks:
  
     - name: Delete spark directory
@@ -67,14 +67,12 @@
         path: '{{ CONFIG }}/spark'
         state: absent
       tags: spark
-      
-    - name: Removing the path from /etc/environment
-      lineinfile:
-        dest: /etc/environment
-        line: 'SPARK_HOME={{ CONFIG }}/spark'
-        insertafter: 'EOF'
-        regexp: 'SPARK_HOME={{ CONFIG }}/spark'
-        state: absent
-      become: yes
-      tags: spark
+      ignore_errors: yes
 
+    - name: Delete sparkRapidsPlugin directory
+      file:
+        path: '{{ CONFIG }}/sparkRapidsPlugin'
+        state: absent
+      tags: spark
+      ignore_errors: yes
+      
