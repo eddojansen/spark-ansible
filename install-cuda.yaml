@@ -34,16 +34,16 @@
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
       tags: packages
 
-    - name: Adding CUDA to /etc/environment
+    - name: 'Add {{ extra_path }} to PATH'
       lineinfile:
-        dest: /etc/environment
-        line: 'PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"'
-        insertafter: 'EOF'
-        regexp: 'PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"'
-        state: present
-      become: yes
-      tags: config
-
+        path: /etc/environment
+        regexp: 'PATH=(["])((?!.*?/usr/local/cuda-10.1/bin${PATH:+:${PATH}}).*?)(["])$'
+        line: 'PATH=\1\2:/usr/local/cuda-10.1/bin${PATH:+:${PATH}}\3'
+        backrefs: yes
+      when: lookup('file', '/etc/environment') is search('^\s*PATH\s*=')
+      tags: test1
+    
+    
     - name: Adding LD_LIBRARY to /etc/environment
       lineinfile:
         dest: /etc/environment
