@@ -1,5 +1,5 @@
 ---
-- hosts: slaves
+- hosts: master:slaves
   vars_files:
     - vars/spark.yaml
   become: yes
@@ -47,8 +47,8 @@
     - name: Ensure netdata is configured to listen on all IP's
       lineinfile:
         path: /etc/netdata/netdata.conf
-        regexp: 'bind socket to IP ='
-        line:         bind socket to IP = {{ ansible_default_ipv4.address }}
+        regexp: 'IP ='
+        line:         bind to IP = {{ ansible_default_ipv4.address }}
       tags: packages
 
     - name: Restart netdata

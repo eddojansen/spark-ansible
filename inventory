@@ -2,8 +2,8 @@
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 [master]
-ejansen-slurm1
+node-1
 
 [slaves]
-ejansen-slurm1
-ejansen-slurm2
+node-1
+node2-2

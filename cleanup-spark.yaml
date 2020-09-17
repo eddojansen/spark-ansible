@@ -73,4 +73,11 @@
         state: absent
       tags: spark
       ignore_errors: yes
+
+    - name: Delete netdata directory
+      file:
+        path: '/etc/netdata'
+        state: absent
+      tags: spark
+      ignore_errors: yes
       
