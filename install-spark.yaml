@@ -186,6 +186,20 @@
         dest: '{{ CONFIG }}/sparkRapidsPlugin'
       tags: spark
 
+    - name: Download additional jars
+      get_url:
+        url: '{{ item }}'
+        dest: '{{ CONFIG }}/spark/jars'
+      with_items: 
+         - '{{ JODA_URL }}'
+         - '{{ HADOOP_AWS_URL }}'
+         - '{{ AWS_JAVA_SDK_URL }}'
+         - '{{ AWS_JAVA_SDK_CORE_URL }}'
+         - '{{ AWS_JAVA_SDK_DYMODB_URL }}'
+         - '{{ AWS_JAVA_SDK_S3_URL }}'
+         - '{{ GCS_CONNECTOR_HADOOP_URL }}'
+      tags: test
+
 - hosts: master:slaves
   gather_facts: true
   vars_files:

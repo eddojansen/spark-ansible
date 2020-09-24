@@ -1,5 +1,12 @@
 CONFIG: /quobyte/config
+WORKER_OPTS: "-Dspark.worker.resource.gpu.amount=1 -Dspark.worker.resource.gpu.discoveryScript='{{ CONFIG }}'/sparkRapidsPlugin/getGpusResources.sh"
 SPARK_DOWNLOAD_URL: https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop3.2.tgz
 RAPIDS_PLUGIN_URL: https://repo1.maven.org/maven2/com/nvidia/rapids-4-spark_2.12/0.1.0/rapids-4-spark_2.12-0.1.0.jar
 CUDF_FILES_URL: https://repo1.maven.org/maven2/ai/rapids/cudf/0.14/cudf-0.14-cuda10-1.jar
-WORKER_OPTS: "-Dspark.worker.resource.gpu.amount=1 -Dspark.worker.resource.gpu.discoveryScript='{{ CONFIG }}'/sparkRapidsPlugin/getGpusResources.sh"
+JODA_URL: https://github.com/JodaOrg/joda-time/releases/download/v2.10.5/joda-time-2.10.5.jar
+HADOOP_AWS_URL: https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar
+AWS_JAVA_SDK_URL: https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.11.687/aws-java-sdk-1.11.687.jar
+AWS_JAVA_SDK_CORE_URL: https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-core/1.11.687/aws-java-sdk-core-1.11.687.jar
+AWS_JAVA_SDK_DYMODB_URL: https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-dynamodb/1.11.687/aws-java-sdk-dynamodb-1.11.687.jar
+AWS_JAVA_SDK_S3_URL: https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-s3/1.11.687/aws-java-sdk-s3-1.11.687.jar
+GCS_CONNECTOR_HADOOP_URL: https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-latest.jar
