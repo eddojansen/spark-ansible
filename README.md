@@ -13,7 +13,7 @@ Automated installation and configuration of a spark cluster.
 
 ## Step2: Install ansible on the master node (apt/yum install -y ansible)
 
-## Step3: Update the var/spark.yaml file where:
+## Step3: Update the vars/spark.yaml file where:
 * CONFIG: Is a shared storage location accesible by all nodes (NFS or Quobyte, etc)
 * SPARK_DOWNLOAD_URL: Is the download url of the spark version you want to install (for example: https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop3.2.tgz)
 * SPARK_MASTER: Is the IP address of the Spark master node
