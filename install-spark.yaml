@@ -41,6 +41,7 @@
         - scala
         - git
         - unzip  
+        - build-essential  
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
       tags: packages
 
@@ -155,6 +156,13 @@
     - name: Create spark directory
       file:
         path: '{{ CONFIG }}/spark'
+        state: directory
+        recurse: yes
+      tags: spark
+
+    - name: Create spark history directory
+      file:
+        path: '{{ CONFIG }}/spark/history'
         state: directory
         recurse: yes
       tags: spark
@@ -333,6 +341,15 @@
         - "{{ slave_ip }}"
       tags: spark
  
+    - name: Copy spark-defaults.conf
+      environment:
+        SPARK_HOME: '{{ CONFIG }}/spark'
+      copy:
+        src: templates/spark-defaults.conf
+        dest: $SPARK_HOME/conf/spark-defaults.conf
+        backup: yes
+      tags: spark
+
     - name: Start Spark Master & Slaves
       environment:
         SPARK_HOME: '{{ CONFIG }}/spark'
